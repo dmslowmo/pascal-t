@@ -1,2 +1,4 @@
 pascal-t
 *.o
+.cproject
+.project

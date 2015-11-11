@@ -11,17 +11,16 @@ The usage:
 #include <cstdlib>
 #include <climits>
 #include <vector>
+#include <string>
 
 using namespace std;
 
 using Row = vector<int>;
 
-Row pascalTriangle(int level, int spaces, unsigned modulus);
-
 constexpr unsigned DarkBackground = 1;
 constexpr unsigned argno = 2;
 
-enum class ColorCode
+enum class Color : unsigned
 {
 	Black,
 	Red,
@@ -33,53 +32,59 @@ enum class ColorCode
 	White
 };
 
-int main(int argc, char* argv[]) {
-
-	if (argc < 2) {
-		cout << "Usage: " << argv[0] << " [no. of levels]" << " [optional: modulus]" << endl;
-		exit(1);
+string rowAsMultiColorString(string leadingSpaces, Row row, unsigned modulo)
+{
+	string str = leadingSpaces;
+	for (auto element : row) {
+		str += "\033[1;" + to_string(30 + (element % modulo) % 7 + DarkBackground) + "m"; //the color code prefix
+		str += to_string(element % modulo); //the element to print
+		str += "\033[0m"; //the suffix to reset the color
+		str += " ";
 	}
-
-	int spaces = 1;
-	int level = atoi(argv[1]);
-	unsigned modulus = UINT_MAX;
-	if (argc >= 3) modulus = atoi(argv[2]);
-	pascalTriangle(level, spaces, modulus);
-	cout << endl;
-
-	return 0;
+	str.pop_back();
+	return str;
 }
 
-Row pascalTriangle(int level, int spaces, unsigned modulus) {
-
-	int offset = DarkBackground;
-
+Row pascalTriangle(int level, int leadingSpaces, unsigned modulo)
+{
 	if (level == 0) {
 		cout << "invalid argument, aborted" << endl;
 		throw;
 	} else if (level == 1) {
-		cout << string((spaces - 1), ' ');
-		cout << "\033[1;" << 30 + static_cast<int>(ColorCode::Green) << "m" << 1 << "\033[0m" << endl;
-		return Row{1};
+		Row row = Row{1};
+		cout << rowAsMultiColorString(string(leadingSpaces, ' '), row, modulo) << endl;
+		return row;
 	} else if (level == 2) {
-		Row rowAbove = pascalTriangle(level - 1, spaces + 1, modulus);
-		cout << string((spaces - 1), ' ');
-		cout << "\033[1;" << 30 + static_cast<int>(ColorCode::Green) << "m" << 1 << " " << 1 << "\033[0m" << endl;
+		pascalTriangle(level - 1, leadingSpaces + 1, modulo);
+		cout << rowAsMultiColorString(string(leadingSpaces, ' '), Row{1, 1}, modulo) << endl;
 		return Row{1, 1};
 	} else {
-		Row rowAbove = pascalTriangle(level - 1, spaces + 1, modulus);
-		cout << string((spaces - 1), ' ');
-		Row row(1, 1);
-		cout << "\033[1;" << 30 + static_cast<int>(ColorCode::Green) << "m" << row[0] % modulus << "\033[0m";
-		for (int i = 1; i < level - 1; ++i) {
+		Row rowAbove = pascalTriangle(level - 1, leadingSpaces + 1, modulo);
+		Row row = Row{1};
+		for (int i = 1; i < (level - 1); ++i) {
 			unsigned int element = rowAbove[i - 1] + rowAbove[i];
-			cout << " " << "\033[1;" << 30 + (element % modulus) % 7 + offset << "m" << element % modulus << "\033[0m";
 			row.push_back(element);
 		}
 		row.push_back(1);
-		cout << " " << "\033[1;" << 30 + static_cast<int>(ColorCode::Green) << "m" << row.back() % modulus << "\033[0m";
-		cout << endl;
+		cout << rowAsMultiColorString(string(leadingSpaces, ' '), row, modulo) << endl;
 		return row;
 	}
 
+}
+
+int main(int argc, char* argv[])
+{
+	if (argc < 2) {
+		cout << "Usage: " << argv[0] << " [no. of levels]" << " [optional: modulo]" << endl;
+		exit(1);
+	}
+
+	int spaces = 0;
+	int level = atoi(argv[1]);
+	unsigned modulo = UINT_MAX;
+	if (argc >= 3) modulo = atoi(argv[2]);
+	pascalTriangle(level, spaces, modulo);
+	cout << endl;
+
+	return 0;
 }
