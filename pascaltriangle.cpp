@@ -20,18 +20,6 @@ using Row = vector<int>;
 constexpr unsigned DarkBackground = 1;
 constexpr unsigned argno = 2;
 
-enum class Color : unsigned
-{
-	Black,
-	Red,
-	Green,
-	Yellow,
-	Blue,
-	Magenta,
-	Cyan,
-	White
-};
-
 string rowAsMultiColorString(string leadingSpaces, Row row, unsigned modulo)
 {
 	string str = leadingSpaces;
