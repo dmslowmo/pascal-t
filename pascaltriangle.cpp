@@ -22,7 +22,7 @@ using Rows = vector<Row>;
 constexpr bool DarkBackground = true;
 constexpr unsigned NumOfPossibleColors = 7;
 
-string rowAsMultiColorString(string leadingSpaces, Row row, unsigned modulo)
+string rowAsMultiColorString(string leadingSpaces, Row row, unsigned modulo = UINT_MAX)
 {
 	string str = leadingSpaces;
 	for (auto element : row) {
