@@ -73,19 +73,29 @@ string serializeTriangle(Rows triangle, unsigned modulo = UINT_MAX)
 	return os.str();
 }
 
+void usage(const string& arg0)
+{
+	cout << "Usage: " << arg0 << " [levels]" << " [optional: modulo]" << endl;
+	cout << "where levels > 0 and modulo > 0" << endl;
+}
+
 int main(int argc, char* argv[])
 {
-	if (argc < 2 || atoi(argv[1]) <= 0 || atoi(argv[2]) <= 0) {
-		cout << "Usage: " << argv[0] << " [levels]" << " [optional: modulo]" << endl;
-		cout << "where levels > 0 and modulo > 0" << endl;
-		exit(1);
+	if (argc < 2) {
+		usage(string(argv[0]));
+		return 1;
+	}
+	int levels = atoi(argv[1]);
+	unsigned modulo = UINT_MAX;
+	if (argc > 2) {
+		modulo = atoi(argv[2]);
+	}
+	if (levels == 0 || modulo == 0) {
+		usage(string(argv[0]));
+		return 1;
 	}
 
-	int level = atoi(argv[1]);
-	unsigned modulo = UINT_MAX;
-	if (argc >= 3) modulo = atoi(argv[2]);
-
-	Rows triangle = pascalTriangle(level);
+	Rows triangle = pascalTriangle(levels);
 	cout << serializeTriangle(triangle, modulo) << endl;
 	return 0;
 }
