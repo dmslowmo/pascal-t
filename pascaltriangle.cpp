@@ -33,7 +33,7 @@ string rowAsMultiColorString(string leadingSpaces, Row row, unsigned modulo)
 	return str;
 }
 
-Row pascalTriangle(int level, int leadingSpaces, unsigned modulo)
+Row pascalTriangle(int level, unsigned modulo, int leadingSpaces = 0 )
 {
 	if (level == 0) {
 		cout << "invalid argument, aborted" << endl;
@@ -43,11 +43,11 @@ Row pascalTriangle(int level, int leadingSpaces, unsigned modulo)
 		cout << rowAsMultiColorString(string(leadingSpaces, ' '), row, modulo) << endl;
 		return row;
 	} else if (level == 2) {
-		pascalTriangle(level - 1, leadingSpaces + 1, modulo);
+		pascalTriangle(level - 1, modulo, leadingSpaces + 1);
 		cout << rowAsMultiColorString(string(leadingSpaces, ' '), Row{1, 1}, modulo) << endl;
 		return Row{1, 1};
 	} else {
-		Row rowAbove = pascalTriangle(level - 1, leadingSpaces + 1, modulo);
+		Row rowAbove = pascalTriangle(level - 1, modulo, leadingSpaces + 1);
 		Row row = Row{1};
 		for (int i = 1; i < (level - 1); ++i) {
 			unsigned int element = rowAbove[i - 1] + rowAbove[i];
@@ -67,11 +67,10 @@ int main(int argc, char* argv[])
 		exit(1);
 	}
 
-	int spaces = 0;
 	int level = atoi(argv[1]);
 	unsigned modulo = UINT_MAX;
 	if (argc >= 3) modulo = atoi(argv[2]);
-	pascalTriangle(level, spaces, modulo);
+	pascalTriangle(level, modulo);
 	cout << endl;
 
 	return 0;
