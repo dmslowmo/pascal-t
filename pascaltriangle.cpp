@@ -8,6 +8,7 @@ The usage:
 */
 
 #include <iostream>
+#include <sstream>
 #include <cstdlib>
 #include <climits>
 #include <vector>
@@ -16,6 +17,7 @@ The usage:
 using namespace std;
 
 using Row = vector<int>;
+using Rows = vector<Row>;
 
 constexpr unsigned DarkBackground = 1;
 constexpr unsigned argno = 2;
@@ -33,45 +35,57 @@ string rowAsMultiColorString(string leadingSpaces, Row row, unsigned modulo)
 	return str;
 }
 
-Row pascalTriangle(int level, unsigned modulo, int leadingSpaces = 0)
+Rows pascalTriangle(int level)
 {
 	if (level == 0) {
-		cout << "invalid argument, aborted" << endl;
+		cout << "invalid argument: " << level << endl;
 		throw;
 	} else if (level == 1) {
 		Row row = Row{1};
-		cout << rowAsMultiColorString(string(leadingSpaces, ' '), row, modulo) << endl;
-		return row;
+		return Rows{row};
 	} else if (level == 2) {
-		pascalTriangle(level - 1, modulo, leadingSpaces + 1);
-		cout << rowAsMultiColorString(string(leadingSpaces, ' '), Row{1, 1}, modulo) << endl;
-		return Row{1, 1};
+		Rows triangle = pascalTriangle(1);
+		triangle.push_back(Row{1, 1});
+		return triangle;
 	} else {
-		Row rowAbove = pascalTriangle(level - 1, modulo, leadingSpaces + 1);
+		Rows triangleAbove = pascalTriangle(level - 1);
+		Row rowAbove = triangleAbove[level - 2];
 		Row row = Row{1};
 		for (int i = 1; i < (level - 1); ++i) {
 			unsigned int element = rowAbove[i - 1] + rowAbove[i];
 			row.push_back(element);
 		}
 		row.push_back(1);
-		cout << rowAsMultiColorString(string(leadingSpaces, ' '), row, modulo) << endl;
-		return row;
+		Rows triangle = triangleAbove;
+		triangle.push_back(row);
+		return triangle;
 	}
+}
 
+string serializeTriangle(Rows triangle, unsigned modulo = UINT_MAX)
+{
+	ostringstream os;
+	string leadingSpaces = string(triangle.size(), ' ');
+	for (Row row : triangle) {
+		os << rowAsMultiColorString(leadingSpaces, row, modulo) << endl;
+		leadingSpaces.pop_back();
+	}
+	return os.str();
 }
 
 int main(int argc, char* argv[])
 {
-	if (argc < 2) {
-		cout << "Usage: " << argv[0] << " [no. of levels]" << " [optional: modulo]" << endl;
+	if (argc < 2 || atoi(argv[1]) <= 0 || atoi(argv[2]) <= 0) {
+		cout << "Usage: " << argv[0] << " [levels]" << " [optional: modulo]" << endl;
+		cout << "where levels > 0 and modulo > 0" << endl;
 		exit(1);
 	}
 
 	int level = atoi(argv[1]);
 	unsigned modulo = UINT_MAX;
 	if (argc >= 3) modulo = atoi(argv[2]);
-	pascalTriangle(level, modulo);
-	cout << endl;
 
+	Rows triangle = pascalTriangle(level);
+	cout << serializeTriangle(triangle, modulo) << endl;
 	return 0;
 }
