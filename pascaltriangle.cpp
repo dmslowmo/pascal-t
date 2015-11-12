@@ -33,7 +33,7 @@ string rowAsMultiColorString(string leadingSpaces, Row row, unsigned modulo)
 	return str;
 }
 
-Row pascalTriangle(int level, unsigned modulo, int leadingSpaces = 0 )
+Row pascalTriangle(int level, unsigned modulo, int leadingSpaces = 0)
 {
 	if (level == 0) {
 		cout << "invalid argument, aborted" << endl;
