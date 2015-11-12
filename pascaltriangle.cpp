@@ -19,14 +19,16 @@ using namespace std;
 using Row = vector<int>;
 using Rows = vector<Row>;
 
-constexpr unsigned DarkBackground = 1;
-constexpr unsigned argno = 2;
+constexpr bool DarkBackground = true;
+constexpr unsigned NumOfPossibleColors = 7;
 
 string rowAsMultiColorString(string leadingSpaces, Row row, unsigned modulo)
 {
 	string str = leadingSpaces;
 	for (auto element : row) {
-		str += "\033[1;" + to_string(30 + (element % modulo) % 7 + DarkBackground) + "m"; //the color code prefix
+		str += "\033[1;" +
+				to_string(30 + (element % modulo) % NumOfPossibleColors + static_cast<unsigned>(DarkBackground)) +
+				"m"; //the color code prefix
 		str += to_string(element % modulo); //the element to print
 		str += "\033[0m"; //the suffix to reset the color
 		str += " ";
