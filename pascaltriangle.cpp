@@ -13,11 +13,13 @@ The usage:
 #include <climits>
 #include <vector>
 #include <string>
+#include <functional>
 
 using namespace std;
 
 using Row = vector<int>;
 using Rows = vector<Row>;
+using RowStringGenerator = function<string(string, Row, unsigned)>;
 
 constexpr bool DarkBackground = true;
 constexpr unsigned NumOfPossibleColors = 7;
@@ -31,6 +33,17 @@ string rowAsMultiColorString(string leadingSpaces, Row row, unsigned modulo = UI
 				"m"; //the color code prefix
 		str += to_string(element % modulo); //the element to print
 		str += "\033[0m"; //the suffix to reset the color
+		str += " ";
+	}
+	str.pop_back();
+	return str;
+}
+
+string rowAsString(string leadingSpaces, Row row, unsigned modulo= UINT_MAX)
+{
+	string str = leadingSpaces;
+	for (auto element : row) {
+		str += to_string(element % modulo);
 		str += " ";
 	}
 	str.pop_back();
@@ -64,12 +77,13 @@ Rows pascalTriangle(int level)
 	}
 }
 
-string serializeTriangle(Rows triangle, unsigned modulo = UINT_MAX)
+string serializeTriangle(Rows triangle, RowStringGenerator rowStringGenerator, unsigned modulo = UINT_MAX)
 {
 	ostringstream os;
 	string leadingSpaces = string(triangle.size(), ' ');
 	for (Row row : triangle) {
-		os << rowAsMultiColorString(leadingSpaces, row, modulo) << endl;
+		os << rowStringGenerator(leadingSpaces, row, modulo);
+		os << endl;
 		leadingSpaces.pop_back();
 	}
 	return os.str();
@@ -77,7 +91,7 @@ string serializeTriangle(Rows triangle, unsigned modulo = UINT_MAX)
 
 void usage(const string& arg0)
 {
-	cout << "Usage: " << arg0 << " [levels]" << " [optional: modulo]" << endl;
+	cout << "Usage: " << arg0 << " [levels]" << " [optional: modulo]" << "[optional: monochrome]" << endl;
 	cout << "where levels > 0 and modulo > 0" << endl;
 }
 
@@ -97,7 +111,10 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	using namespace placeholders; // for _1, _2, _3...
+
 	Rows triangle = pascalTriangle(levels);
-	cout << serializeTriangle(triangle, modulo) << endl;
+	RowStringGenerator f = bind(rowAsMultiColorString, _1, _2, _3);
+	cout << serializeTriangle(triangle, f, modulo) << endl;
 	return 0;
 }
