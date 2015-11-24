@@ -91,7 +91,7 @@ string serializeTriangle(Rows triangle, RowStringGenerator rowStringGenerator, u
 
 void usage(const string& arg0)
 {
-	cout << "Usage: " << arg0 << " [levels]" << " [optional: modulo]" << "[optional: monochrome]" << endl;
+	cout << "Usage: " << arg0 << " [levels]" << " [optional: modulo]" << endl;
 	cout << "where levels > 0 and modulo > 0" << endl;
 }
 
