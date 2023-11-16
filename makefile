@@ -1,4 +1,4 @@
-CPPFLAGS = -O0 -g -Wall -Wextra -pedantic -Werror -std=c++11
+CPPFLAGS = -O0 -g -Wall -Wextra -pedantic -Werror -std=c++20
 RM = rm -rf
 SRC = $(shell pwd)
 EXEC := $(notdir $(SRC))

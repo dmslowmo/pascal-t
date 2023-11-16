@@ -9,7 +9,6 @@ The usage:
 
 #include <iostream>
 #include <sstream>
-#include <cstdlib>
 #include <climits>
 #include <vector>
 #include <string>
@@ -17,17 +16,17 @@ The usage:
 
 using namespace std;
 
-using Row = vector<int>;
+using Row = vector<unsigned>;
 using Rows = vector<Row>;
 using RowStringGenerator = function<string(string, Row, unsigned)>;
 
 constexpr bool DarkBackground = true;
 constexpr unsigned NumOfPossibleColors = 7;
 
-string rowAsMultiColorString(string leadingSpaces, Row row, unsigned modulo = UINT_MAX)
+string rowAsMultiColorString(string leadingSpaces, const Row& row, const unsigned modulo = UINT_MAX)
 {
-	string str = leadingSpaces;
-	for (auto element : row) {
+	string str = std::move(leadingSpaces);
+	for (auto const element : row) {
 		str += "\033[1;" +
 				to_string(30 + (element % modulo) % NumOfPossibleColors + static_cast<unsigned>(DarkBackground)) +
 				"m"; //the color code prefix
@@ -39,10 +38,10 @@ string rowAsMultiColorString(string leadingSpaces, Row row, unsigned modulo = UI
 	return str;
 }
 
-string rowAsString(string leadingSpaces, Row row, unsigned modulo= UINT_MAX)
+string rowAsString(string leadingSpaces, const Row& row, const unsigned modulo= UINT_MAX)
 {
-	string str = leadingSpaces;
-	for (auto element : row) {
+	string str = std::move(leadingSpaces);
+	for (auto const element : row) {
 		str += to_string(element % modulo);
 		str += " ";
 	}
@@ -50,38 +49,39 @@ string rowAsString(string leadingSpaces, Row row, unsigned modulo= UINT_MAX)
 	return str;
 }
 
-Rows pascalTriangle(int level)
+Rows pascalTriangle(const int level)
 {
 	if (level == 0) {
 		cout << "invalid argument: " << level << endl;
 		throw;
-	} else if (level == 1) {
-		Row row = Row{1};
+	}
+	if (level == 1) {
+		const Row row = Row{1};
 		return Rows{row};
-	} else if (level == 2) {
-		Rows triangle = pascalTriangle(1);
+	}
+	if (level == 2) {
+		Rows triangle = Rows{Row{1}};
 		triangle.push_back(Row{1, 1});
 		return triangle;
-	} else {
-		Rows triangleAbove = pascalTriangle(level - 1);
-		Row rowAbove = triangleAbove[level - 2];
-		Row row = Row{1};
-		for (int i = 1; i < (level - 1); ++i) {
-			unsigned int element = rowAbove[i - 1] + rowAbove[i];
-			row.push_back(element);
-		}
-		row.push_back(1);
-		Rows triangle = triangleAbove;
-		triangle.push_back(row);
-		return triangle;
 	}
+	const Rows triangleAbove = pascalTriangle(level - 1);
+	const Row& rowAbove = triangleAbove[level - 2];
+	Row row = Row{1};
+	for (int i = 1; i < (level - 1); ++i) {
+		const unsigned int element = rowAbove[i - 1] + rowAbove[i];
+		row.push_back(element);
+	}
+	row.push_back(1);
+	Rows triangle = triangleAbove;
+	triangle.push_back(row);
+	return triangle;
 }
 
-string serializeTriangle(Rows triangle, RowStringGenerator rowStringGenerator, unsigned modulo = UINT_MAX)
+string serializeTriangle(const Rows& triangle, const RowStringGenerator& rowStringGenerator, const unsigned modulo = UINT_MAX)
 {
 	ostringstream os;
 	string leadingSpaces = string(triangle.size(), ' ');
-	for (Row row : triangle) {
+	for (const Row& row : triangle) {
 		os << rowStringGenerator(leadingSpaces, row, modulo);
 		os << endl;
 		leadingSpaces.pop_back();
@@ -91,20 +91,20 @@ string serializeTriangle(Rows triangle, RowStringGenerator rowStringGenerator, u
 
 void usage(const string& arg0)
 {
-	cout << "Usage: " << arg0 << " [levels]" << " [optional: modulo]" << endl;
-	cout << "where levels > 0 and modulo > 0" << endl;
+	cout << "Usage: " << arg0 << " [height]" << " [optional: modulo]" << endl;
+	cout << "where height > 0 and modulo > 0" << endl;
 }
 
-int main(int argc, char* argv[])
+int main(const int argc, char* argv[])
 {
 	if (argc < 2) {
 		usage(string(argv[0]));
 		return 1;
 	}
-	int levels = atoi(argv[1]);
+	const int levels = stoi(argv[1]);
 	unsigned modulo = UINT_MAX;
 	if (argc > 2) {
-		modulo = atoi(argv[2]);
+		modulo = stoi(argv[2]);
 	}
 	if (levels == 0 || modulo == 0) {
 		usage(string(argv[0]));
@@ -113,8 +113,8 @@ int main(int argc, char* argv[])
 
 	using namespace placeholders; // for _1, _2, _3...
 
-	Rows triangle = pascalTriangle(levels);
-	RowStringGenerator f = bind(rowAsMultiColorString, _1, _2, _3);
+	const Rows triangle = pascalTriangle(levels);
+	const RowStringGenerator f = bind(rowAsMultiColorString, _1, _2, _3);
 	cout << serializeTriangle(triangle, f, modulo) << endl;
 	return 0;
 }
